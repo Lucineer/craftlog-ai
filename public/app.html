@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CraftLog AI — Your Crafting Companion</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --amber:#D97706;--amber-light:#F59E0B;--amber-dark:#B45309;--amber-glow:#FEF3C7;
+  --cream:#FFFBEB;--cream-dark:#FEF3C7;--wood:#92400E;--wood-light:#A16207;
+  --text:#451A03;--text-muted:#78350F;--white:#FFFFFF;--border:#D6D3D1;
+  --success:#059669;--danger:#DC2626;--shadow:0 4px 12px rgba(120,53,15,0.12);
+  --radius:12px;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--cream);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* Wood texture header */
+header{background:linear-gradient(135deg,#5C2D0E 0%,#7C3A11 30%,#6B3410 60%,#8B4513 100%);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(92,45,14,0.3);position:relative;overflow:hidden}
+header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(255,255,255,.02) 40px,rgba(255,255,255,.02) 42px);pointer-events:none}
+header::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 12px,rgba(0,0,0,.04) 12px,rgba(0,0,0,.04) 13px);pointer-events:none}
+.logo{display:flex;align-items:center;gap:.75rem;color:var(--amber-light);font-size:1.5rem;font-weight:700;letter-spacing:-.02em;position:relative;z-index:1}
+.logo-icon{font-size:2rem}
+nav{display:flex;gap:.5rem;position:relative;z-index:1;flex-wrap:wrap}
+nav button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#FDE68A;padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:500;transition:all .2s}
+nav button:hover,nav button.active{background:var(--amber);color:var(--white);border-color:var(--amber)}
+
+/* Main layout */
+main{max-width:1200px;margin:0 auto;padding:1.5rem}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Cards */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(120,53,15,0.18)}
+
+/* Project cards grid */
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem;margin-top:1rem}
+.project-card .card-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:.75rem}
+.project-card h3{font-size:1.1rem;color:var(--wood);margin-bottom:.25rem}
+.project-card .category{font-size:.75rem;color:var(--amber-dark);background:var(--amber-glow);padding:.15rem .5rem;border-radius:20px}
+.project-card .description{color:var(--text-muted);font-size:.9rem;line-height:1.5;margin-bottom:.75rem}
+.progress-bar{height:8px;background:var(--cream-dark);border-radius:4px;overflow:hidden;margin:.5rem 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--amber-light));border-radius:4px;transition:width .3s}
+.progress-text{font-size:.8rem;color:var(--text-muted)}
+.status-badge{display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.75rem;font-weight:600}
+.status-planned{background:#DBEAFE;color:#1E40AF}
+.status-in_progress{background:#FEF3C7;color:#92400E}
+.status-completed{background:#D1FAE5;color:#065F46}
+.status-abandoned{background:#FEE2E2;color:#991B1B}
+.difficulty-badge{font-size:.7rem;padding:.15rem .4rem;border-radius:4px;margin-left:.5rem}
+.difficulty-beginner{background:#D1FAE5;color:#065F46}
+.difficulty-intermediate{background:#FEF3C7;color:#92400E}
+.difficulty-advanced{background:#FEE2E2;color:#991B1B}
+
+/* Steps list */
+.steps-list{list-style:none;margin:.75rem 0}
+.steps-list li{padding:.4rem 0;padding-left:1.5rem;position:relative;font-size:.85rem;color:var(--text-muted)}
+.steps-list li::before{content:'';position:absolute;left:0;top:.65rem;width:10px;height:10px;border:2px solid var(--border);border-radius:50%}
+.steps-list li.completed::before{background:var(--success);border-color:var(--success)}
+.steps-list li.completed{text-decoration:line-through;color:var(--border)}
+
+/* Materials table */
+.materials-table{width:100%;border-collapse:collapse;margin-top:1rem;background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.materials-table th{background:linear-gradient(135deg,var(--wood),var(--wood-light));color:#FDE68A;padding:.75rem 1rem;text-align:left;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.materials-table td{padding:.65rem 1rem;border-bottom:1px solid var(--cream-dark);font-size:.9rem}
+.materials-table tr:hover td{background:var(--amber-glow)}
+.low-stock{color:var(--danger);font-weight:600}
+
+/* Cost tracker */
+.cost-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-top:1rem}
+.cost-stat{background:var(--white);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow);text-align:center}
+.cost-stat .amount{font-size:1.75rem;font-weight:700;color:var(--wood)}
+.cost-stat .label{font-size:.8rem;color:var(--text-muted);margin-top:.25rem}
+.cost-entries{margin-top:1.5rem}
+.cost-entry{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;background:var(--white);border-radius:8px;margin-bottom:.5rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.cost-entry .cost-cat{font-size:.7rem;padding:.15rem .4rem;border-radius:4px;background:var(--amber-glow);color:var(--amber-dark)}
+
+/* Tutorial cards */
+.tutorials-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.25rem;margin-top:1rem}
+.tutorial-card .tut-header{margin-bottom:.75rem}
+.tutorial-card h3{color:var(--wood);font-size:1.05rem}
+.tutorial-card .tut-desc{color:var(--text-muted);font-size:.85rem;line-height:1.5;margin-bottom:.75rem}
+.tutorial-card .tut-meta{display:flex;gap:.75rem;flex-wrap:wrap;font-size:.8rem;color:var(--text-muted)}
+.tutorial-card .tut-materials{margin-top:.75rem}
+.tutorial-card .tut-materials span{display:inline-block;background:var(--cream-dark);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;margin:.15rem}
+.tutorial-steps{margin-top:.5rem;counter-reset:step}
+.tutorial-steps li{counter-increment:step;padding:.3rem 0 .3rem 2rem;position:relative;font-size:.85rem;color:var(--text-muted);list-style:none}
+.tutorial-steps li::before{content:counter(step);position:absolute;left:0;top:.3rem;width:1.2rem;height:1.2rem;background:var(--amber);color:var(--white);border-radius:50%;font-size:.65rem;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+/* Chat */
+.chat-container{display:flex;flex-direction:column;height:calc(100vh - 140px)}
+.chat-messages{flex:1;overflow-y:auto;padding:1rem 0}
+.chat-msg{display:flex;margin-bottom:1rem;gap:.75rem}
+.chat-msg.user{flex-direction:row-reverse}
+.chat-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.chat-msg.assistant .chat-avatar{background:linear-gradient(135deg,var(--amber),var(--amber-light));color:var(--white)}
+.chat-msg.user .chat-avatar{background:var(--wood);color:#FDE68A}
+.chat-bubble{max-width:75%;padding:.75rem 1rem;border-radius:var(--radius);line-height:1.5;font-size:.9rem}
+.chat-msg.assistant .chat-bubble{background:var(--white);border:1px solid var(--border);box-shadow:var(--shadow)}
+.chat-msg.user .chat-bubble{background:var(--amber);color:var(--white)}
+.chat-input-area{display:flex;gap:.5rem;padding:1rem 0;border-top:1px solid var(--border)}
+.chat-input-area input{flex:1;padding:.75rem 1rem;border:2px solid var(--border);border-radius:var(--radius);font-size:.95rem;background:var(--white);outline:none;transition:border-color .2s}
+.chat-input-area input:focus{border-color:var(--amber)}
+.chat-input-area button{background:linear-gradient(135deg,var(--amber),var(--amber-light));color:var(--white);border:none;padding:.75rem 1.5rem;border-radius:var(--radius);font-size:.95rem;font-weight:600;cursor:pointer;transition:transform .1s}
+.chat-input-area button:hover{transform:scale(1.03)}
+.typing-indicator .dot{display:inline-block;width:6px;height:6px;background:var(--text-muted);border-radius:50%;margin:0 2px;animation:bounce .6s infinite alternate}
+.typing-indicator .dot:nth-child(2){animation-delay:.15s}
+.typing-indicator .dot:nth-child(3){animation-delay:.3s}
+@keyframes bounce{to{transform:translateY(-4px);opacity:.4}}
+
+/* Section headers */
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.section-header h2{font-size:1.35rem;color:var(--wood);display:flex;align-items:center;gap:.5rem}
+.section-header button{background:var(--amber);color:var(--white);border:none;padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600}
+.section-header button:hover{background:var(--amber-dark)}
+
+/* Search bar */
+.search-bar{display:flex;gap:.5rem;margin-top:1rem}
+.search-bar input{flex:1;padding:.6rem 1rem;border:2px solid var(--border);border-radius:8px;font-size:.9rem;background:var(--white);outline:none}
+.search-bar input:focus{border-color:var(--amber)}
+.search-bar select{padding:.6rem;border:2px solid var(--border);border-radius:8px;font-size:.9rem;background:var(--white);outline:none;color:var(--text)}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(69,26,3,.4);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--white);border-radius:var(--radius);padding:2rem;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h2{color:var(--wood);margin-bottom:1rem;font-size:1.2rem}
+.modal label{display:block;font-size:.85rem;font-weight:600;color:var(--text-muted);margin-bottom:.25rem;margin-top:.75rem}
+.modal input,.modal textarea,.modal select{width:100%;padding:.6rem;border:2px solid var(--border);border-radius:8px;font-size:.9rem;outline:none}
+.modal input:focus,.modal textarea:focus,.modal select:focus{border-color:var(--amber)}
+.modal textarea{resize:vertical;min-height:80px}
+.modal-actions{display:flex;gap:.5rem;margin-top:1.5rem;justify-content:flex-end}
+.modal-actions button{padding:.5rem 1.25rem;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:.9rem}
+.btn-primary{background:var(--amber);color:var(--white)}
+.btn-secondary{background:var(--cream-dark);color:var(--text-muted)}
+
+/* Empty state */
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--text-muted)}
+.empty-state .icon{font-size:3rem;margin-bottom:.5rem}
+.empty-state h3{color:var(--wood);margin-bottom:.5rem}
+
+/* Responsive */
+@media(max-width:768px){
+  header{flex-direction:column;gap:.75rem;padding:1rem}
+  nav{justify-content:center}
+  .projects-grid,.tutorials-grid{grid-template-columns:1fr}
+  .chat-bubble{max-width:90%}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon">&#9971;</span>
+    CraftLog AI
+  </div>
+  <nav>
+    <button class="active" onclick="switchTab('projects')">&#128203; Projects</button>
+    <button onclick="switchTab('materials')">&#128230; Materials</button>
+    <button onclick="switchTab('costs')">&#128176; Costs</button>
+    <button onclick="switchTab('tutorials')">&#128218; Tutorials</button>
+    <button onclick="switchTab('chat')">&#128172; Chat</button>
+  </nav>
+</header>
+
+<main>
+  <!-- PROJECTS TAB -->
+  <div id="tab-projects" class="tab-content active">
+    <div class="section-header">
+      <h2>&#128296; My Projects</h2>
+      <button onclick="openModal('project')">&#43; New Project</button>
+    </div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search projects..." id="project-search" oninput="renderProjects()">
+      <select id="project-filter-status" onchange="renderProjects()">
+        <option value="">All Status</option>
+        <option value="planned">Planned</option>
+        <option value="in_progress">In Progress</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+    <div id="projects-grid" class="projects-grid"></div>
+  </div>
+
+  <!-- MATERIALS TAB -->
+  <div id="tab-materials" class="tab-content">
+    <div class="section-header">
+      <h2>&#127811; Material Inventory</h2>
+      <button onclick="openModal('material')">&#43; Add Material</button>
+    </div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search materials..." id="material-search" oninput="renderMaterials()">
+      <select id="material-filter-low" onchange="renderMaterials()">
+        <option value="">All</option>
+        <option value="true">Low Stock</option>
+      </select>
+    </div>
+    <div id="materials-list"></div>
+  </div>
+
+  <!-- COSTS TAB -->
+  <div id="tab-costs" class="tab-content">
+    <div class="section-header">
+      <h2>&#128178; Cost Tracker</h2>
+      <button onclick="openModal('cost')">&#43; Add Expense</button>
+    </div>
+    <div class="cost-summary" id="cost-summary"></div>
+    <div class="cost-entries" id="cost-entries"></div>
+  </div>
+
+  <!-- TUTORIALS TAB -->
+  <div id="tab-tutorials" class="tab-content">
+    <div class="section-header">
+      <h2>&#127793; Tutorial Finder</h2>
+    </div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search tutorials..." id="tutorial-search" oninput="renderTutorials()">
+      <select id="tutorial-filter-cat" onchange="renderTutorials()">
+        <option value="">All Categories</option>
+      </select>
+      <select id="tutorial-filter-diff" onchange="renderTutorials()">
+        <option value="">All Levels</option>
+        <option value="beginner">Beginner</option>
+        <option value="intermediate">Intermediate</option>
+        <option value="advanced">Advanced</option>
+      </select>
+    </div>
+    <div id="tutorials-grid" class="tutorials-grid"></div>
+  </div>
+
+  <!-- CHAT TAB -->
+  <div id="tab-chat" class="tab-content">
+    <div class="chat-container">
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-msg assistant">
+          <div class="chat-avatar">&#9971;</div>
+          <div class="chat-bubble">
+            Hey there, maker! &#128075; I'm CraftLog AI, your crafting companion. Ask me about project ideas, techniques, materials, or anything DIY. What are you working on today?
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Ask about crafts, materials, techniques..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button onclick="sendChat()">Send</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modals -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+// --- State ---
+let projects = [];
+let materials = [];
+let costEntries = [];
+let tutorials = [];
+let chatMessages = [];
+
+// --- API helpers ---
+const API = '';
+async function api(path, opts = {}) {
+  const res = await fetch(API + path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// --- Tab switching ---
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  if (tab === 'projects') loadProjects();
+  if (tab === 'materials') loadMaterials();
+  if (tab === 'costs') loadCosts();
+  if (tab === 'tutorials') loadTutorials();
+}
+
+// --- Projects ---
+async function loadProjects() {
+  try { projects = await api('/api/projects'); } catch { projects = []; }
+  renderProjects();
+}
+function renderProjects() {
+  const search = document.getElementById('project-search').value.toLowerCase();
+  const statusFilter = document.getElementById('project-filter-status').value;
+  let filtered = projects.filter(p => {
+    if (search && !p.name.toLowerCase().includes(search) && !p.description.toLowerCase().includes(search)) return false;
+    if (statusFilter && p.status !== statusFilter) return false;
+    return true;
+  });
+  const grid = document.getElementById('projects-grid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="icon">&#128296;</div><h3>No projects yet</h3><p>Create your first DIY project to get started!</p></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(p => {
+    const completed = p.steps ? p.steps.filter(s => s.completed).length : 0;
+    const total = p.steps ? p.steps.length : 0;
+    const pct = total ? Math.round(completed / total * 100) : 0;
+    return `<div class="card project-card">
+      <div class="card-header">
+        <div><h3>${esc(p.name)}</h3><span class="category">${esc(p.category)}</span>
+        <span class="difficulty-badge difficulty-${p.difficulty}">${p.difficulty}</span></div>
+        <span class="status-badge status-${p.status}">${p.status.replace('_',' ')}</span>
+      </div>
+      <div class="description">${esc(p.description)}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-text">${completed}/${total} steps complete (${pct}%)</div>
+      ${p.steps && p.steps.length ? `<ul class="steps-list">${p.steps.map(s => `<li class="${s.completed?'completed':''}">${esc(s.title)}</li>`).join('')}</ul>` : ''}
+      <div style="display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap">
+        ${p.tags ? p.tags.map(t => `<span style="font-size:.7rem;background:var(--cream-dark);padding:.1rem .4rem;border-radius:4px;color:var(--text-muted)">#${esc(t)}</span>`).join('') : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// --- Materials ---
+async function loadMaterials() {
+  try { materials = await api('/api/materials/inventory'); } catch { materials = []; }
+  renderMaterials();
+}
+function renderMaterials() {
+  const search = document.getElementById('material-search').value.toLowerCase();
+  const lowOnly = document.getElementById('material-filter-low').value === 'true';
+  let filtered = materials.filter(m => {
+    if (search && !m.name.toLowerCase().includes(search)) return false;
+    if (lowOnly && m.quantityOnHand > m.minQuantity) return false;
+    return true;
+  });
+  const el = document.getElementById('materials-list');
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">&#127811;</div><h3>No materials found</h3><p>Add materials to your inventory to track stock levels.</p></div>';
+    return;
+  }
+  el.innerHTML = `<table class="materials-table"><thead><tr>
+    <th>Name</th><th>Category</th><th>In Stock</th><th>Min</th><th>Unit Cost</th><th>Value</th><th>Actions</th>
+  </tr></thead><tbody>${filtered.map(m => `<tr>
+    <td><strong>${esc(m.name)}</strong></td>
+    <td>${esc(m.category)}</td>
+    <td class="${m.quantityOnHand <= m.minQuantity ? 'low-stock' : ''}">${m.quantityOnHand} ${esc(m.unit)}</td>
+    <td>${m.minQuantity}</td>
+    <td>$${m.unitCost.toFixed(2)}</td>
+    <td>$${(m.quantityOnHand * m.unitCost).toFixed(2)}</td>
+    <td><button onclick="restockMaterial('${m.id}')" style="background:var(--success);color:white;border:none;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-size:.75rem">Restock</button></td>
+  </tr>`).join('')}</tbody></table>`;
+}
+async function restockMaterial(id) {
+  const qty = prompt('Restock quantity:', '10');
+  if (!qty) return;
+  await api(`/api/materials/inventory/${id}/restock`, { method: 'POST', body: { quantity: Number(qty) } });
+  loadMaterials();
+}
+
+// --- Costs ---
+async function loadCosts() {
+  try { costEntries = await api('/api/costs'); } catch { costEntries = []; }
+  renderCosts();
+}
+function renderCosts() {
+  const total = costEntries.reduce((s, e) => s + e.amount, 0);
+  const byCat = costEntries.reduce((a, e) => { a[e.category] = (a[e.category] || 0) + e.amount; return a; }, {});
+  document.getElementById('cost-summary').innerHTML = `
+    <div class="cost-stat"><div class="amount">$${total.toFixed(2)}</div><div class="label">Total Spent</div></div>
+    ${Object.entries(byCat).map(([k, v]) => `<div class="cost-stat"><div class="amount">$${v.toFixed(2)}</div><div class="label">${k}</div></div>`).join('')}
+  `;
+  document.getElementById('cost-entries').innerHTML = costEntries.length ? costEntries.map(e => `
+    <div class="cost-entry">
+      <div><strong>${esc(e.description)}</strong><br><span class="cost-cat">${esc(e.category)}</span> <span style="color:var(--text-muted);font-size:.8rem">${esc(e.projectName || '')} &middot; ${new Date(e.date).toLocaleDateString()}</span></div>
+      <div style="font-weight:700;color:var(--wood);font-size:1.1rem">$${e.amount.toFixed(2)}</div>
+    </div>
+  `).join('') : '<div class="empty-state"><div class="icon">&#128176;</div><h3>No expenses yet</h3><p>Track your crafting costs here.</p></div>';
+}
+
+// --- Tutorials ---
+async function loadTutorials() {
+  try {
+    tutorials = await api('/api/tutorials');
+    const cats = await api('/api/tutorials/categories');
+    const sel = document.getElementById('tutorial-filter-cat');
+    sel.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+  } catch { tutorials = []; }
+  renderTutorials();
+}
+function renderTutorials() {
+  const search = document.getElementById('tutorial-search').value.toLowerCase();
+  const cat = document.getElementById('tutorial-filter-cat').value;
+  const diff = document.getElementById('tutorial-filter-diff').value;
+  let filtered = tutorials.filter(t => {
+    if (search && !t.title.toLowerCase().includes(search) && !t.description.toLowerCase().includes(search) && !t.tags.some(tag => tag.includes(search))) return false;
+    if (cat && t.category !== cat) return false;
+    if (diff && t.difficulty !== diff) return false;
+    return true;
+  });
+  const grid = document.getElementById('tutorials-grid');
+  grid.innerHTML = filtered.map(t => `
+    <div class="card tutorial-card">
+      <div class="tut-header"><h3>${esc(t.title)}</h3></div>
+      <div class="tut-desc">${esc(t.description)}</div>
+      <div class="tut-meta">
+        <span class="difficulty-badge difficulty-${t.difficulty}">${t.difficulty}</span>
+        <span>&#9201; ${esc(t.estimatedTime)}</span>
+        <span>${esc(t.category)}</span>
+      </div>
+      <ol class="tutorial-steps">${t.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+      <div class="tut-materials"><strong style="font-size:.8rem">Materials:</strong> ${t.materialsNeeded.map(m => `<span>${esc(m)}</span>`).join(' ')}</div>
+    </div>
+  `).join('');
+}
+
+// --- Chat ---
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  chatMessages.push({ role: 'user', content: msg });
+  appendChat('user', msg);
+
+  const typingId = appendChat('assistant', '<div class="typing-indicator"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>', true);
+
+  try {
+    const res = await fetch(API + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatMessages }),
+    });
+    document.getElementById(typingId)?.remove();
+
+    if (!res.ok) throw new Error('Chat failed');
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let assistantMsg = '';
+    const bubbleId = appendChat('assistant', '', false);
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6);
+        if (data === '[DONE]') break;
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices?.[0]?.delta?.content || '';
+          if (content) {
+            assistantMsg += content;
+            const el = document.getElementById(bubbleId);
+            if (el) el.textContent = assistantMsg;
+            scrollChat();
+          }
+        } catch {}
+      }
+    }
+    chatMessages.push({ role: 'assistant', content: assistantMsg });
+  } catch (e) {
+    document.getElementById(typingId)?.remove();
+    appendChat('assistant', 'Sorry, I had trouble with that request. Please try again.');
+  }
+}
+function appendChat(role, html, returnId = false) {
+  const container = document.getElementById('chat-messages');
+  const id = 'msg-' + Date.now() + Math.random().toString(36).slice(2, 6);
+  const avatar = role === 'user' ? '&#128100;' : '&#9971;';
+  container.insertAdjacentHTML('beforeend', `
+    <div class="chat-msg ${role}" id="${id}">
+      <div class="chat-avatar">${avatar}</div>
+      <div class="chat-bubble">${html}</div>
+    </div>
+  `);
+  scrollChat();
+  return returnId ? id : undefined;
+}
+function scrollChat() {
+  const c = document.getElementById('chat-messages');
+  c.scrollTop = c.scrollHeight;
+}
+
+// --- Modals ---
+function openModal(type) {
+  const mc = document.getElementById('modal-content');
+  if (type === 'project') {
+    mc.innerHTML = `<h2>&#128296; New Project</h2>
+      <label>Name</label><input id="m-name" placeholder="e.g. Rustic Bookshelf">
+      <label>Description</label><textarea id="m-desc" placeholder="What are you building?"></textarea>
+      <label>Category</label><select id="m-cat">
+        <option>woodworking</option><option>candles</option><option>fiber-arts</option>
+        <option>textiles</option><option>gardening</option><option>pottery</option><option>other</option>
+      </select>
+      <label>Difficulty</label><select id="m-diff">
+        <option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option>
+      </select>
+      <label>Estimated Hours</label><input id="m-hours" type="number" value="4">
+      <label>Tags (comma separated)</label><input id="m-tags" placeholder="e.g. wood, shelf, living-room">
+      <div class="modal-actions"><button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="createProject()">Create</button></div>`;
+  } else if (type === 'material') {
+    mc.innerHTML = `<h2>&#127811; Add Material</h2>
+      <label>Name</label><input id="m-mname" placeholder="e.g. Pine Board 1x6">
+      <label>Category</label><select id="m-mcat">
+        <option>wood</option><option>metal</option><option>fabric</option><option>paint</option><option>adhesive</option><option>hardware</option><option>other</option>
+      </select>
+      <label>Unit</label><input id="m-munit" placeholder="e.g. pieces, feet, yards">
+      <label>Unit Cost ($)</label><input id="m-mcost" type="number" step="0.01" value="5.00">
+      <label>Quantity on Hand</label><input id="m-mqty" type="number" value="10">
+      <label>Min Quantity (reorder threshold)</label><input id="m-mmin" type="number" value="2">
+      <div class="modal-actions"><button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="createMaterial()">Add</button></div>`;
+  } else if (type === 'cost') {
+    mc.innerHTML = `<h2>&#128178; Add Expense</h2>
+      <label>Project Name</label><input id="m-cproject" placeholder="e.g. Rustic Bookshelf">
+      <label>Category</label><select id="m-ccat">
+        <option value="material">Material</option><option value="tool">Tool</option><option value="shipping">Shipping</option><option value="other">Other</option>
+      </select>
+      <label>Description</label><input id="m-cdesc" placeholder="e.g. Pine boards from Home Depot">
+      <label>Amount ($)</label><input id="m-camt" type="number" step="0.01" value="25.00">
+      <div class="modal-actions"><button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="createCost()">Add</button></div>`;
+  }
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
+
+async function createProject() {
+  const name = document.getElementById('m-name').value;
+  if (!name) return alert('Please enter a project name');
+  const body = {
+    name,
+    description: document.getElementById('m-desc').value || '',
+    category: document.getElementById('m-cat').value,
+    difficulty: document.getElementById('m-diff').value,
+    estimatedHours: Number(document.getElementById('m-hours').value) || 4,
+    materials: [],
+    steps: [],
+    photos: [],
+    tags: (document.getElementById('m-tags').value || '').split(',').map(t => t.trim()).filter(Boolean),
+  };
+  await api('/api/projects', { method: 'POST', body });
+  closeModal();
+  loadProjects();
+}
+async function createMaterial() {
+  const name = document.getElementById('m-mname').value;
+  if (!name) return alert('Please enter a material name');
+  const body = {
+    name,
+    category: document.getElementById('m-mcat').value,
+    unit: document.getElementById('m-munit').value || 'pieces',
+    unitCost: Number(document.getElementById('m-mcost').value) || 0,
+    quantityOnHand: Number(document.getElementById('m-mqty').value) || 0,
+    minQuantity: Number(document.getElementById('m-mmin').value) || 1,
+  };
+  await api('/api/materials/inventory', { method: 'POST', body });
+  closeModal();
+  loadMaterials();
+}
+async function createCost() {
+  const desc = document.getElementById('m-cdesc').value;
+  if (!desc) return alert('Please enter a description');
+  const body = {
+    projectId: '',
+    projectName: document.getElementById('m-cproject').value || 'General',
+    category: document.getElementById('m-ccat').value,
+    description: desc,
+    amount: Number(document.getElementById('m-camt').value) || 0,
+    date: new Date().toISOString(),
+  };
+  await api('/api/costs', { method: 'POST', body });
+  closeModal();
+  loadCosts();
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+// --- Init ---
+loadProjects();
+</script>
+</body>
+</html>
