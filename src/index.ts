@@ -1,3 +1,5 @@
+import { addNode, addEdge, traverse, crossDomainQuery, findPath, domainStats, getDomainNodes } from './lib/knowledge-graph.js';
+import { loadSeedIntoKG, FLEET_REPOS, loadAllSeeds } from './lib/seed-loader.js';
 // src/index.ts — CraftLog AI Cloudflare Worker
 
 import { ProjectTracker, MaterialInventory, CostEstimator, TutorialSearch } from "./craft/tracker";
