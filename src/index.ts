@@ -250,7 +250,8 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 
   // Serve static files from public/
   if (path === "/" || path === "/index.html") {
-    return new Response(await fetch(new URL("/app.html", url.origin)), {
+    const r = await fetch(new URL("/app.html", url.origin));
+    return new Response(r.body, {
       headers: { "Content-Type": "text/html" },
     });
   }
