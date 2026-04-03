@@ -77,6 +77,12 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   }
+
+  if (path === '/health') {
+    return new Response(JSON.stringify({ status: 'ok', repo: 'craftlog-ai', timestamp: Date.now() }), {
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  }
   const method = request.method;
 
   // CORS preflight
