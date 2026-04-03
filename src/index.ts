@@ -65,11 +65,6 @@ Be warm, encouraging, and practical. Use crafting terminology naturally. When su
 async function handleRequest(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
 
-  if (path === '/health') {
-    return new Response(JSON.stringify({ status: 'ok', repo: 'craftlog-ai', timestamp: Date.now() }), {
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-    });
-  }
   const path = url.pathname;
 
   if (path === '/health') {
@@ -78,11 +73,8 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
     });
   }
 
-  if (path === '/health') {
-    return new Response(JSON.stringify({ status: 'ok', repo: 'craftlog-ai', timestamp: Date.now() }), {
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-    });
-  }
+
+
   const method = request.method;
 
   // CORS preflight
