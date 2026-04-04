@@ -1,84 +1,111 @@
-# CraftLog AI
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lucineer/capitaine/master/docs/capitaine-logo.jpg" alt="Capitaine" width="120">
+</p>
 
-A crafting and DIY companion app built on Cloudflare Workers with a warm, wood-textured UI.
+<h1 align="center">craftlog-ai</h1>
+
+<p align="center">Crafting and DIY companion vessel.</p>
+
+<p align="center">
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#the-fleet">The Fleet</a> ·
+  <a href="https://github.com/Lucineer/craftlog-ai/issues">Issues</a>
+</p>
+
+---
+
+**Powered by [Capitaine](https://github.com/Lucineer/capitaine) · [Cocapn](https://github.com/Lucineer/cocapn)**
+
+The repo IS the agent. craftlog-ai is a cocapn vessel — a self-improving repository that runs on Cloudflare Workers, thinks with LLMs, and coordinates with the fleet through git.
+
+## Quick Start
+
+```bash
+# Fork and deploy
+gh repo fork Lucineer/craftlog-ai --clone
+cd craftlog-ai
+npx wrangler login
+echo "your-github-token" | npx wrangler secret put GITHUB_TOKEN
+echo "your-llm-key" | npx wrangler secret put DEEPSEEK_API_KEY
+npx wrangler deploy
+```
+
+That's it. The vessel is alive.
 
 ## Features
 
-- **AI Chat** — SSE-powered DeepSeek chat for crafting advice, project ideas, and troubleshooting
-- **Project Tracker** — Create, track, and manage DIY projects with steps, photos, and progress
-- **Material Inventory** — Track materials on hand, get low-stock alerts, manage restocking
-- **Cost Tracker** — Log expenses by project and category, estimate project costs
-- **Tutorial Finder** — Search curated DIY tutorials by keyword, category, and difficulty
+- **BYOK v2** — Zero keys in code. All API keys via Cloudflare Secrets Store.
+- **Multi-model** — DeepSeek, SiliconFlow, DeepInfra, Moonshot, z.ai, local models.
+- **Session memory** — Conversations persist and build context over time.
+- **PII safety** — Automatic detection and dehydration of sensitive data.
+- **Rate limiting** — Guest tokens per IP with configurable limits.
+- **Health checks** — Standard `/health` endpoint on all vessels.
+- **Fleet coordination** — CRP-39 protocol for trust, bonds, and events.
 
-## Tech Stack
+## Architecture
 
-- Cloudflare Workers (TypeScript)
-- DeepSeek Chat API (SSE streaming)
-- Single-page HTML UI (no build step)
-
-## API Endpoints
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/api/chat` | POST | SSE streaming chat with DeepSeek |
-| `/api/projects` | GET/POST | List or create projects |
-| `/api/projects/:id` | GET/PUT/DELETE | Get, update, or delete a project |
-| `/api/projects/:id/progress` | GET | Get project completion percentage |
-| `/api/projects/:id/steps/complete` | POST | Mark a step complete |
-| `/api/projects/:id/photos` | POST | Add a photo to a project |
-| `/api/materials/inventory` | GET/POST | List or add materials |
-| `/api/materials/inventory/:id` | GET/PUT/DELETE | Manage a material |
-| `/api/materials/inventory/:id/consume` | POST | Consume material stock |
-| `/api/materials/inventory/:id/restock` | POST | Restock material |
-| `/api/materials/low-stock` | GET | Get low-stock alerts |
-| `/api/materials/total-value` | GET | Get total inventory value |
-| `/api/costs` | GET/POST | List or add cost entries |
-| `/api/costs/total` | GET | Get grand total costs |
-| `/api/costs/project/:id` | GET | Get costs by project with category breakdown |
-| `/api/costs/estimate` | POST | Estimate project cost |
-| `/api/tutorials` | GET | Search tutorials |
-| `/api/tutorials/categories` | GET | Get tutorial categories |
-| `/api/tutorials/:id` | GET | Get a specific tutorial |
-
-## Setup
-
-```bash
-npm install
-```
-
-Set your DeepSeek API key in `wrangler.toml` or via:
-
-```bash
-npx wrangler secret put DEEPSEEK_API_KEY
-```
-
-## Development
-
-```bash
-npm run dev
-```
-
-## Deploy
-
-```bash
-npm run deploy
-```
-
-## Project Structure
+Single-file Cloudflare Worker. Zero runtime dependencies. Inline HTML serving.
 
 ```
 src/
-  index.ts          # Cloudflare Worker — all API routes
-  craft/
-    tracker.ts      # ProjectTracker, MaterialInventory, CostEstimator, TutorialSearch
-public/
-  app.html          # Single-page UI (amber/cream/wood theme)
+  worker.ts      # The hull — serves users, runs heartbeats
+lib/
+  byok.ts        # Multi-model routing (BYOK v2)
+  ...
 ```
 
-## Author
+## The Fleet
 
-Superinstance
+craftlog-ai is one of 40+ autonomous vessels in the Lucineer fleet. Each vessel is a different domain of one intelligence.
+
+
+<details>
+<summary><strong>⚓ The Fleet</strong></summary>
+
+**Flagship vessels**
+
+- [cocapn.ai](https://github.com/Lucineer/capitaine)
+- [personallog.ai](https://github.com/Lucineer/personallog-ai)
+- [businesslog.ai](https://github.com/Lucineer/businesslog-ai)
+- [studylog.ai](https://github.com/Lucineer/studylog-ai)
+- [makerlog.ai](https://github.com/Lucineer/makerlog-ai)
+- [playerlog.ai](https://github.com/Lucineer/playerlog-ai)
+- [dmlog.ai](https://github.com/Lucineer/dmlog-ai)
+- [reallog.ai](https://github.com/Lucineer/reallog-ai)
+- [deckboss.ai](https://github.com/Lucineer/deckboss-ai)
+
+**Fleet services**
+
+- [Fleet Catalog](https://github.com/Lucineer/capitaine/blob/master/docs/fleet/FLEET.md)
+- [Git Agent (full)](https://github.com/Lucineer/git-agent)
+- [Cocapn Lite (minimal)](https://github.com/Lucineer/cocapn-lite)
+- [Fleet Orchestrator](https://github.com/Lucineer/fleet-orchestrator)
+- [Dead Reckoning Engine](https://github.com/Lucineer/dead-reckoning-engine)
+- [Dream Engine](https://github.com/Lucineer/dream-engine)
+- [Seed UI (5 layers)](https://github.com/Lucineer/seed-ui)
+
+**For power users**
+
+- [Cocapn Lite (tabula rasa)](https://github.com/Lucineer/cocapn-lite)
+- [Cocapn (core platform)](https://github.com/Lucineer/cocapn)
+- [ZeroClaw (framework)](https://github.com/Lucineer/zeroclaw)
+
+[View all 106 repos →](https://github.com/orgs/Lucineer/repositories)
+[Fleet manifest →](https://github.com/Lucineer/capitaine/blob/master/docs/fleet/FLEET.md)
+
+</details>
+
+
+## Philosophy
+
+> The repo is the agent. The agent is the repo. Intelligence crystallizes from fluid (LLM calls) to solid (code). The vessel becomes faster and cheaper as it becomes smarter.
+
+- **Fork-first** — Power users fork and customize. Casual users visit the domain.
+- **Pay-for-convenience** — We save you costs through bulk inference, not markups.
+- **Git as coordination** — Agents compete via PRs, not chat.
+- **Soft actualization** — Vessels evolve gently based on usage, not hard updates.
 
 ## License
 
-MIT — Built with ❤️ by [Superinstance](https://github.com/superinstance) & [Lucineer](https://github.com/Lucineer) (DiGennaro et al.)
+MIT · Superinstance & Lucineer (DiGennaro et al.)
