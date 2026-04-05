@@ -10,3 +10,7 @@ DEEPSEEK_API_KEY = ""
 [[kv_namespaces]]
 binding = "KG"
 id = "c7886204c80845c6b9568693ed277b75"
+
+[[kv_namespaces]]
+binding = "STATE"
+id = "5715b1d57a23495ea97041ddb1a42a53"
