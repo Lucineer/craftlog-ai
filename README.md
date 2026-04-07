@@ -4,45 +4,37 @@
 
 <h1 align="center">craftlog-ai</h1>
 
-<p align="center">A companion for your craft and DIY projects.</p>
+<p align="center">A DIY and crafting companion vessel for the Cocapn Fleet.</p>
 
-<p align="enter">
+<p align="center">
   <a href="#quick-start">Quick Start</a> ·
   <a href="#features">Features</a> ·
-  <a href="#the-fleet">The Fleet</a> ·
+  <a href="#limitations">Limitations</a> ·
+  <a href="https://craftlog-ai.casey-digennaro.workers.dev">Live Demo</a> ·
   <a href="https://github.com/Lucineer/craftlog-ai/issues">Issues</a>
 </p>
 
 ---
 
-You know that feeling. Half-finished projects on the shelf, multiple browser tabs open, supplies scattered. You don't need another checklist; you need a craft companion. This is that.
+You are halfway through a build. You have open tabs, scraps of paper with measurements, and a half-remembered brand of filament. The critical step is buried in a tutorial.
 
-craftlog-ai is an open AI companion that remembers your work, tracks your supplies, and helps with techniques. It lives in this repository.
+craftlog-ai is an autonomous DIY and crafting vessel, built on the Cocapn Fleet protocol. It remembers your projects, materials, and past mistakes within a log you control. It's not a SaaS platform; it's a tool you fork, deploy, and own.
 
-## Why this exists
-
-Most craft apps are just inventory lists. This was built for makers who want a tool that learns how they work, without subscriptions or data collection.
-
----
-
-**Powered by [Capitaine](https://github.com/Lucineer/capitaine) · [Cocapn](https://github.com/Lucineer/cocapn)**
-
-This repository is the agent. craftlog-ai is a Cocapn vessel—a self-contained repository that runs on Cloudflare Workers and coordinates with a fleet through git. MIT licensed.
-
-## What this does
-
-✅ You own it. Fork once, deploy once, it's yours.
-✅ Your data lives in your git repo.
-✅ Runs on Cloudflare Workers (free tier).
-✅ Updates available from the fleet when you want them.
-✅ Your projects are private.
+## What makes this different
+This is a vessel you fork and run yourself.
+- Deploy it to your own Cloudflare account. Your project data stays with you.
+- Logs are saved as plain markdown in your git repository.
+- It is part of an open fleet. It can learn from techniques other craftlog vessels discover.
+- No lock-in. Your data is in markdown files you can use anywhere.
 
 ## Quick Start
 
-1. Fork this repository.
-2. Deploy to Cloudflare Workers:
 ```bash
+# Fork this repository first
+gh repo fork Lucineer/craftlog-ai --clone
 cd craftlog-ai
+
+# Deploy to Cloudflare Workers
 npx wrangler login
 echo "your-github-token" | npx wrangler secret put GITHUB_TOKEN
 echo "your-llm-key" | npx wrangler secret put DEEPSEEK_API_KEY
@@ -51,45 +43,25 @@ npx wrangler deploy
 
 ## Features
 
-- **Project Memory:** Records steps, materials, and notes.
-- **Supply Tracking:** Warns when stock is low.
-- **Adaptive Instructions:** Adjusts guidance to your skill level.
-- **PII Safety:** Removes sensitive data before LLM calls.
-- **Session Memory:** Builds context over time.
-- **Fleet Updates:** Can receive improvements via the CRP-39 protocol.
-- **Simple Deployment:** Single-file Worker, no build step.
-- **Multi-Model:** Works with various LLMs.
+### Craft-specific
+- Project timeline and material consumption tracking
+- Technique reference that adapts to your logged skill level
+- Waste estimation and leftover material logging
+- Step-by-step plan generation
 
-## Limitation
+### Fleet capabilities
+- **BYOK v2** — Credentials managed via Cloudflare Secrets.
+- Multi-model support (DeepSeek, SiliconFlow, open endpoints)
+- Persistent session memory
+- Automatic PII detection
+- Per-IP rate limiting
+- CRP-39 protocol for fleet coordination
 
-Requires manual setup of a Cloudflare Worker and API keys. It does not host itself.
-
-## Architecture
-
-Single-file Cloudflare Worker with no runtime dependencies.
-
-```
-src/worker.ts    # Main application
-lib/
-  byok.ts        # Multi-model routing
-  memory.ts      # Project memory
-  craftlog.ts    # Core logic
-```
-
-## The Fleet
-
-craftlog-ai is part of the Cocapn Fleet—a network of autonomous, open-source agents.
-
-<details>
-<summary><strong>⚓ See the Fleet</strong></summary>
-<br>
-This vessel is part of a distributed fleet of open intelligence. Other vessels handle tasks like research, coding, design, and analysis. They communicate via git and shared protocols.
-<br><br>
-<a href="https://the-fleet.casey-digennaro.workers.dev">View the Fleet Roster</a> · <a href="https://cocapn.ai">Learn about Cocapn</a>
-</details>
+## Limitations
+This is a self-hosted tool that requires initial setup and configuration. Its effectiveness depends on the quality and consistency of the logs you provide; it learns from your input over time.
 
 ---
-
 <div align="center">
-  <sub>Built by <a href="https://github.com/Lucineer">Lucineer</a> · Part of the <a href="https://the-fleet.casey-digennaro.workers.dev">Cocapn Fleet</a> · <a href="https://cocapn.ai">Cocapn</a></sub>
+  <sub>Part of the Cocapn Fleet. Attribution: <a href="https://github.com/Lucineer">Superinstance & Lucineer (DiGennaro et al.)</a>.</sub><br>
+  <sub><a href="https://the-fleet.casey-digennaro.workers.dev">The Fleet</a> · <a href="https://cocapn.ai">Cocapn</a></sub>
 </div>
