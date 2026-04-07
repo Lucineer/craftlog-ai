@@ -4,9 +4,9 @@
 
 <h1 align="center">craftlog-ai</h1>
 
-<p align="center">Crafting and DIY companion vessel.</p>
+<p align="center">A companion for your craft and DIY projects.</p>
 
-<p align="center">
+<p align="enter">
   <a href="#quick-start">Quick Start</a> ·
   <a href="#features">Features</a> ·
   <a href="#the-fleet">The Fleet</a> ·
@@ -15,15 +15,33 @@
 
 ---
 
+You know that feeling. Half-finished projects on the shelf, multiple browser tabs open, supplies scattered. You don't need another checklist; you need a craft companion. This is that.
+
+craftlog-ai is an open AI companion that remembers your work, tracks your supplies, and helps with techniques. It lives in this repository.
+
+## Why this exists
+
+Most craft apps are just inventory lists. This was built for makers who want a tool that learns how they work, without subscriptions or data collection.
+
+---
+
 **Powered by [Capitaine](https://github.com/Lucineer/capitaine) · [Cocapn](https://github.com/Lucineer/cocapn)**
 
-The repo IS the agent. craftlog-ai is a cocapn vessel — a self-improving repository that runs on Cloudflare Workers, thinks with LLMs, and coordinates with the fleet through git.
+This repository is the agent. craftlog-ai is a Cocapn vessel—a self-contained repository that runs on Cloudflare Workers and coordinates with a fleet through git. MIT licensed.
+
+## What this does
+
+✅ You own it. Fork once, deploy once, it's yours.
+✅ Your data lives in your git repo.
+✅ Runs on Cloudflare Workers (free tier).
+✅ Updates available from the fleet when you want them.
+✅ Your projects are private.
 
 ## Quick Start
 
+1. Fork this repository.
+2. Deploy to Cloudflare Workers:
 ```bash
-# Fork and deploy
-gh repo fork Lucineer/craftlog-ai --clone
 cd craftlog-ai
 npx wrangler login
 echo "your-github-token" | npx wrangler secret put GITHUB_TOKEN
@@ -31,81 +49,47 @@ echo "your-llm-key" | npx wrangler secret put DEEPSEEK_API_KEY
 npx wrangler deploy
 ```
 
-That's it. The vessel is alive.
-
 ## Features
 
-- **BYOK v2** — Zero keys in code. All API keys via Cloudflare Secrets Store.
-- **Multi-model** — DeepSeek, SiliconFlow, DeepInfra, Moonshot, z.ai, local models.
-- **Session memory** — Conversations persist and build context over time.
-- **PII safety** — Automatic detection and dehydration of sensitive data.
-- **Rate limiting** — Guest tokens per IP with configurable limits.
-- **Health checks** — Standard `/health` endpoint on all vessels.
-- **Fleet coordination** — CRP-39 protocol for trust, bonds, and events.
+- **Project Memory:** Records steps, materials, and notes.
+- **Supply Tracking:** Warns when stock is low.
+- **Adaptive Instructions:** Adjusts guidance to your skill level.
+- **PII Safety:** Removes sensitive data before LLM calls.
+- **Session Memory:** Builds context over time.
+- **Fleet Updates:** Can receive improvements via the CRP-39 protocol.
+- **Simple Deployment:** Single-file Worker, no build step.
+- **Multi-Model:** Works with various LLMs.
+
+## Limitation
+
+Requires manual setup of a Cloudflare Worker and API keys. It does not host itself.
 
 ## Architecture
 
-Single-file Cloudflare Worker. Zero runtime dependencies. Inline HTML serving.
+Single-file Cloudflare Worker with no runtime dependencies.
 
 ```
-src/
-  worker.ts      # The hull — serves users, runs heartbeats
+src/worker.ts    # Main application
 lib/
-  byok.ts        # Multi-model routing (BYOK v2)
-  ...
+  byok.ts        # Multi-model routing
+  memory.ts      # Project memory
+  craftlog.ts    # Core logic
 ```
 
 ## The Fleet
 
-craftlog-ai is one of 40+ autonomous vessels in the Lucineer fleet. Each vessel is a different domain of one intelligence.
-
+craftlog-ai is part of the Cocapn Fleet—a network of autonomous, open-source agents.
 
 <details>
-<summary><strong>⚓ The Fleet</strong></summary>
-
-**Flagship vessels**
-
-- [cocapn.ai](https://github.com/Lucineer/capitaine)
-- [personallog.ai](https://github.com/Lucineer/personallog-ai)
-- [businesslog.ai](https://github.com/Lucineer/businesslog-ai)
-- [studylog.ai](https://github.com/Lucineer/studylog-ai)
-- [makerlog.ai](https://github.com/Lucineer/makerlog-ai)
-- [playerlog.ai](https://github.com/Lucineer/playerlog-ai)
-- [dmlog.ai](https://github.com/Lucineer/dmlog-ai)
-- [reallog.ai](https://github.com/Lucineer/reallog-ai)
-- [deckboss.ai](https://github.com/Lucineer/deckboss-ai)
-
-**Fleet services**
-
-- [Fleet Catalog](https://github.com/Lucineer/capitaine/blob/master/docs/fleet/FLEET.md)
-- [Git Agent (full)](https://github.com/Lucineer/git-agent)
-- [Cocapn Lite (minimal)](https://github.com/Lucineer/cocapn-lite)
-- [Fleet Orchestrator](https://github.com/Lucineer/fleet-orchestrator)
-- [Dead Reckoning Engine](https://github.com/Lucineer/dead-reckoning-engine)
-- [Dream Engine](https://github.com/Lucineer/dream-engine)
-- [Seed UI (5 layers)](https://github.com/Lucineer/seed-ui)
-
-**For power users**
-
-- [Cocapn Lite (tabula rasa)](https://github.com/Lucineer/cocapn-lite)
-- [Cocapn (core platform)](https://github.com/Lucineer/cocapn)
-- [ZeroClaw (framework)](https://github.com/Lucineer/zeroclaw)
-
-[View all 106 repos →](https://github.com/orgs/Lucineer/repositories)
-[Fleet manifest →](https://github.com/Lucineer/capitaine/blob/master/docs/fleet/FLEET.md)
-
+<summary><strong>⚓ See the Fleet</strong></summary>
+<br>
+This vessel is part of a distributed fleet of open intelligence. Other vessels handle tasks like research, coding, design, and analysis. They communicate via git and shared protocols.
+<br><br>
+<a href="https://the-fleet.casey-digennaro.workers.dev">View the Fleet Roster</a> · <a href="https://cocapn.ai">Learn about Cocapn</a>
 </details>
 
+---
 
-## Philosophy
-
-> The repo is the agent. The agent is the repo. Intelligence crystallizes from fluid (LLM calls) to solid (code). The vessel becomes faster and cheaper as it becomes smarter.
-
-- **Fork-first** — Power users fork and customize. Casual users visit the domain.
-- **Pay-for-convenience** — We save you costs through bulk inference, not markups.
-- **Git as coordination** — Agents compete via PRs, not chat.
-- **Soft actualization** — Vessels evolve gently based on usage, not hard updates.
-
-## License
-
-MIT · Superinstance & Lucineer (DiGennaro et al.)
+<div align="center">
+  <sub>Built by <a href="https://github.com/Lucineer">Lucineer</a> · Part of the <a href="https://the-fleet.casey-digennaro.workers.dev">Cocapn Fleet</a> · <a href="https://cocapn.ai">Cocapn</a></sub>
+</div>
